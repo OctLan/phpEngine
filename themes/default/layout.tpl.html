@@ -1,0 +1,21 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Engine Title 请修改在 themes/default/layout.tpl.html 修改 </title>
+<link rel="stylesheet" type="text/css" href="/css/core.css" media="all" />
+<script type="text/javascript" src="http://lib.sinaapp.com/js/jquery/1.7.2/jquery.min.js"></script>
+<script type="text/javascript" src="/js/wExpress.js"></script>
+<script type="text/javascript" src="/js/core.js"></script>
+</head>
+<body>
+<?php
+if(is_file(ROOT.'themes/default/'. $__showPage .'.tpl.html'))
+		include(  ROOT.'themes/default/'. $__showPage .'.tpl.html' );
+	else
+		echo "<div>can't find  $__showPage html file</div>";
+	
+?>
+<script type="text/javascript" charset="utf-8" src="http://js.t.sinajs.cn/t4/enterprise/js/public/appframe/client.js"></script>
+</body>
+</html>
