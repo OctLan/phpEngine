@@ -13,7 +13,7 @@ class Mysql{
             die('can\'t connect to mysql ' . $ $dbInfo['host']  );
         }else{
 	       // mysqli_query( "set names 'utf8'" , $db );
-	        mysqli_query( $db , "set names 'utf8mb4'" );
+	        mysqli_query( $db , "set names 'utf8'" );
         }
         //echo 'connect to: '. $dbInfo['host'].'at db:'.$dbInfo['dbname'].'<br>';
         mysqli_select_db( $db , $dbInfo['dbname'] );
