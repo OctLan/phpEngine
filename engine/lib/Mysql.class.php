@@ -9,20 +9,20 @@ class Mysql{
     private function connect( $is_master = true ){
         if( $is_master ) $dbInfo = $this->master;
         else $dbInfo = $this->slave;
-        if( !$db = mysql_connect( $dbInfo['host'] , $dbInfo['user'] , $dbInfo['passwd'] ) ){
+        if( !$db = mysqli_connect( $dbInfo['host'] , $dbInfo['user'] , $dbInfo['passwd'] ) ){
             die('can\'t connect to mysql ' . $ $dbInfo['host']  );
         }else{
-	       // mysql_query( "set names 'utf8'" , $db );
-	        mysql_query( "set names 'utf8mb4'" , $db );
+	       // mysqli_query( "set names 'utf8'" , $db );
+	        mysqli_query( $db , "set names 'utf8mb4'" );
         }
         //echo 'connect to: '. $dbInfo['host'].'at db:'.$dbInfo['dbname'].'<br>';
-        mysql_select_db( $dbInfo['dbname'] , $db );
+        mysqli_select_db( $db , $dbInfo['dbname'] );
         
         return $db;
     }  
     private function dbRead(){
         if( isset( $this->dbRead ) ){
-            mysql_ping( $this->dbRead );
+            mysqli_ping( $this->dbRead );
             return $this->dbRead;
         }else{
             if( !$this->do_replication ) return $this->dbWrite();
@@ -35,7 +35,7 @@ class Mysql{
     
     private function dbWrite(){
         if( isset( $this->dbWrite ) ){
-            mysql_ping( $this->dbWrite );
+            mysqli_ping( $this->dbWrite );
             return $this->dbWrite;
         }else{
             $this->dbWrite = $this->connect( true );
@@ -50,29 +50,30 @@ class Mysql{
         $this->slave['dbname'] = isset($slave['dbname']) ? $slave['dbname'] : $this->master['dbname'];
         $this->do_replication = true;
     }
-    public function saveError() {
-        //$GLOBALS['MYSQL_LAST_ERROR'] = mysql_error();
-        //$GLOBALS['MYSQL_LAST_ERRNO'] = mysql_errno();
-        if( mysql_errno() ){
-	          print_r(  mysql_error() );
+    public function saveError( $dblink ) {
+        //$GLOBALS['MYSQL_LAST_ERROR'] = mysqli_error($dblink);
+        //$GLOBALS['MYSQL_LAST_ERRNO'] = mysqli_errno($dblink);
+        if( mysqli_errno($dblink) ){
+	         print_r(  mysqli_error($dblink) );
         }
+        
       
     }
     
     public function runSql( $sql ) {
-        $ret = mysql_query( $sql , $this->dbWrite() );
-        $this->saveError();
+        $ret = mysqli_query(  $this->dbWrite()  , $sql );
+        $this->saveError( $this->dbWrite() );
         return $ret;
     }
     public function getData( $sql , $key = NULL ){
         $GLOBALS['MYSQL_LAST_SQL'] = $sql;
         $data = Array();
         $i = 0;
-        $result = mysql_query( $sql , $this->do_replication ? $this->dbRead() : $this->dbWrite()  );
+        $result = mysqli_query( $this->do_replication ? $this->dbRead() : $this->dbWrite() , $sql  );
         
-        $this->saveError();
+        $this->saveError(  $this->do_replication ? $this->dbRead() : $this->dbWrite() );
 
-        while( $Array = mysql_fetch_array($result, MYSQL_ASSOC ) ){
+        while( $Array = mysqli_fetch_array($result, MYSQL_ASSOC ) ){
         	if( $key && isset( $Array[$key] ) ){
 	        	$data[$Array[$key]] = $Array;
         	}else{
@@ -85,7 +86,7 @@ class Mysql{
             echo mysql_error() .' ' . $sql;
         */
         
-        mysql_free_result($result); 
+        //mysqli_free_result($result); 
 
         if( count( $data ) > 0 )
             return $data;
@@ -104,17 +105,17 @@ class Mysql{
     }
     
     public function lastId(){
-        $result = mysql_query( "SELECT LAST_INSERT_ID()" , $this->dbWrite() );
-        return reset( mysql_fetch_array( $result, MYSQL_ASSOC ) );
+        $result = mysqli_insert_id( $this->dbWrite() );
+        return $result;
     }
     
     public function closeDb(){
         if( isset( $this->dbRead ) ){
-	         @mysql_close( $this->dbRead );
+	         @mysqli_close( $this->dbRead );
 	         unset( $this->dbRead );
         }
         if( isset( $this->dbWrite ) ){
-	        @mysql_close( $this->dbWrite );
+	        @mysqli_close( $this->dbWrite );
 	        unset( $this->dbWrite );
         }
     }
@@ -124,7 +125,7 @@ class Mysql{
         elseif( isset($this->dbWrite) )    $db = $this->dbWrite;
         else $db = $this->dbRead();
         
-        return mysql_real_escape_string( $str , $db );
+        return mysqli_real_escape_string(  $db , $str );
     }
     
     public function errno(){
