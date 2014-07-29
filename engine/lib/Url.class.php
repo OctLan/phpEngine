@@ -105,6 +105,7 @@ class Url{
 						$custom[$key] = $value;
 					}
 				}
+				$custom = array_filter(array_merge( (array)$custom , (array)$_GET ));
 			}else{
 				$custom = self::$url;
 			}
